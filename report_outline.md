@@ -25,9 +25,27 @@ We propose a novel solution based on memory compression to address the memory bo
 
 ### Implementation and Design Strategy Details
 
-Let us now consider the details of the implementation starting with the block container.  Code developed in this project followed a general policy design strategy (see code snippets at end for example). A major benefit of this approach is there now exists a framework for adding in additional compression libraries in the future which will be discussed later on. The compression policy is an intrinsic part of the block and defaults to zlib compression.  Utility functions "compress/uncompress" **code** are used for the respective one-shot operations on the block one-shot meaning they compress, and uncompress entirely.  The block is a representation of a contiguous piece of memory. If the posix memalign allocation policy is used, then padding is provided to ensure that each row is aligned in memory. By adopting a convention that a unique block address can be described by the row position multiplied by the column position, we can transform a large 1 dimensional array of memory into a 2 dimensional representation; In this way the block may be treated like a general matrix.  Worth noting upfront is the decision to embrace a policy design for the block, and its essential components. This means that a block particulars -- compressor, allocator, or type -- can be specified in the instantiation.  There are two varieties of allocator: cstandard is for regular malloc and free memory allocation; align is for posix memory allocation. Zlib is our currently implemented compression policy, but others can be added using zlib policy as a template. The numeric value stored in the block may be any one of the c++ numeric types, and this is accomplished through standard templating terms.  These items make up the foundational aspects of the block.
+Let us now consider the details of the implementation starting with the block container.  Code developed in this project followed a general policy design strategy (see code snippets at end for example). A major benefit of this approach is there now exists a framework for adding in additional compression libraries in the future which will be discussed later on. The compression policy is an intrinsic part of the block and defaults to zlib compression.  Utility functions `compress uncompress`  are used for the respective one-shot operations on the block one-shot meaning they compress, and uncompress entirely.  The block is a representation of a contiguous piece of memory. If the posix memalign allocation policy is used, then padding is provided to ensure that each row is aligned in memory. By adopting a convention that a unique block address can be described by the row position multiplied by the column position, we can transform a large 1 dimensional array of memory into a 2 dimensional representation; In this way the block may be treated like a general matrix.  Worth noting upfront is the decision to embrace a policy design for the block, and its essential components. This means that a block particulars -- compressor, allocator, or type -- can be specified in the instantiation.  There are two varieties of allocator: cstandard is for regular malloc and free memory allocation; align is for posix memory allocation. Zlib is our currently implemented compression policy, but others can be added using zlib policy as a template. The numeric value stored in the block may be any one of the c++ numeric types, and this is accomplished through standard templating terms.  These items make up the foundational aspects of the block.
 
-With this understanding in place, its worth discussing the functional capabilities of the block. The block supports basic IO using the c++ stream redirection operator << for output via ostream types, and input >> operations in relation to ifstream types. Continuing with STL related capabilities, the block also has a nested random access iterator class which enables more straightforward access to other tools in the STL, such as sorting. The compression capabilities of the block allow for one shot full block compression/uncompression using the zlib library.  This has the side effect of rendering the data stored in the block unusable for calculations. At any point it is possible to to interrogate the block for information relating to its size, or current compression state. For examples of each of these capabilities please refer to the table shown below.
+With this understanding in place, its worth
+discussing the functional capabilities of the
+block. The block supports basic IO using the c++
+stream redirection operator `<<` for output via
+ostream types, and input `>>` operations in relation
+to ifstream types. Continuing with STL related
+capabilities, the block also has a nested random
+access iterator class which enables more
+straightforward access to other tools in the STL,
+such as sorting. The compression capabilities of
+the block allow for one shot full block
+compression/uncompression using the zlib library.
+This has the side effect of rendering the data
+stored in the block unusable for calculations. At
+any point it is possible to to interrogate the
+block for information relating to its size, or
+current compression state. For examples of each of
+these capabilities please refer to the table shown
+below.
 
 capability  example
 ----------- -----------------------------------------
@@ -47,15 +65,15 @@ Next lets briefly consider a few implementation details used to achieve this fun
 
 Given that memory bandwith is one of our main concerns, we use the STREAM benchmark to measure the benefits of streaming compressed data to and from memory. This tool measures bandwith during four canonical computations copy, scale, add, triad involving numeric containers (labeled A,B,C): copy asigns the contents of A to B; scale asigns scalar multiples of each element in A to B; add sums A and B elementwise and assigns to C; the triad assigns to C the elementwise sum of A and B multiplied by a scalar.  We reimplemented the STREAM benchmark based on the block container.  Using three vectors A,B,C, we then created a superstructure (the hybrid block) containing 640 blocks of 8000 bytes each to ensure the benchmark data wouldn't be able to fit in any of the caches.  This superstructure was responsible for managing all the blocks required by the benchmark. In each of the computations described above we loop over all of the vector positions using the timer to calculate run times for the whole set.  Each calculation is performed on blocks that involve the compression routine, and those that don't for comparison.
 
-Another performance evaluation tool used by the compression mini-app is the kernel measure. This uses three increasingly complex computational kernels to explore performance differences between compression , and non compression routines as a function of computational complexity of the kernels. This is done to test whether increasing levels of computational complexity are able to hide the latency associated with compressing and uncompressing the data. The first level is a simple addition of integers, and is the most similar to the STREAM benchmark computations; the second level is meant to resemble the calculation that is performed in updating synapses PSP's using the Tsodyks-Markram model treating the blocks data as parameters for the main formulae; the third level is a Euler method for solving a differential equation where the equation has been specified as **latex** $y^3 + 30*t$ arbitrarily. We use a vector of 100 identical blocks in our program to ensure that each block is not simply left in a cache between each of these operations. Altogether this tool should help provide another dimension to the question of performance improvements, as we can tell when the latency of compression is hidden by the complexity of a calculation.
+Another performance evaluation tool used by the compression mini-app is the kernel measure. This uses three increasingly complex computational kernels to explore performance differences between compression , and non compression routines as a function of computational complexity of the kernels. This is done to test whether increasing levels of computational complexity are able to hide the latency associated with compressing and uncompressing the data. The first level is a simple addition of integers, and is the most similar to the STREAM benchmark computations; the second level is meant to resemble the calculation that is performed in updating synapses PSP's using the Tsodyks-Markram model treating the blocks data as parameters for the main formulae; the third level is a Euler method for solving a differential equation where the equation has been specified as $y^3 + 30*t$ arbitrarily. We use a vector of 100 identical blocks in our program to ensure that each block is not simply left in a cache between each of these operations. Altogether this tool should help provide another dimension to the question of performance improvements, as we can tell when the latency of compression is hidden by the complexity of a calculation.
 
 The extensive BOOST library is used to assist in argument parsing, and testing. The program_options tool is used to provide program help options, and parse the arguments provided by the user in a flexible manner. BOOST allows for creation of a full suite of unit testing. Testing was applied to ensure that the process of reading into a file created the same block representations as if values had been provided one by one for each block element. Another important domain for testing was to determine that none of the values in the block are modified permanently as a result of the compression/uncompression routines. 
 
 ## Results 
 
-Using the zlib library allows for significant reduction in the size of the block, at the cost of time and memory resources. As seen in figure 1, there is a significant reduction in the memory used for a block even with trivial one-shot zlib compression. Nearly 2.25x times less memory is needed. Other information relating to this compression result can be found in the code table shown in the snippets on the last page.
+Using the zlib library allows for significant reduction in the size of the block, at the cost of time and memory resources. As seen in figure 1, there is a significant reduction in the memory used for a block even with trivial one-shot zlib compression. With compression  on average 2.17x (sd .528) times less memory is needed. Other information relating to this compression result can be found in the code table shown in the snippets on the last page.
 
-![One shot zlib compression](./vanillares.png)
+![One shot zlib compression](./vanilla_comp_many.png)
 
 
 In applying the stream benchmark calculations to compression vs non-compression routines it was determined that the compression has significant detrimental effects on the speed of our computations. See figure 2 for the specific differences in the stream benchmark performance. The bandwith measurements taken in compression and uncompression executions were on average 16 (sd 2.62) times smaller than those measured in non-compression routines. The block size used in these measurements was 4.5 MB, and vectors of 120 block elements were used to bring the total size of our stream_measurements to 537.6 MB. 
@@ -134,21 +152,20 @@ unsplitting took 1.458 ms
 
 
 ~~~
-//Oneshot Zlib info 
-comp.speed       comp.size     
-Min.   : 3.574   Min.   :22078 
-1st Qu.: 3.634   1st Qu.:22078 
-Median : 3.694   Median :22078 
-Mean   : 4.320   Mean   :22078 
-3rd Qu.: 3.917   3rd Qu.:22078 
-Max.   :11.018   Max.   :22078 
- uncomp.speed     normal.size     comp.factor   
-  Min.   :0.2053   Min.   :49760   Min.   :2.254  
-  1st Qu.:0.2229   1st Qu.:49760   1st Qu.:2.254  
-  Median :0.2538   Median :49760   Median :2.254  
-  Mean   :0.2745   Mean   :49760   Mean   :2.254  
-  3rd Qu.:0.2618   3rd Qu.:49760   3rd Qu.:2.254  
-  Max.   :0.6633   Max.   :49760   Max.   :2.254
+  comp.size         normal         comp.speed     
+ Min.   :   37   Min.   :    32   Min.   : 0.1118  
+ 1st Qu.: 5702   1st Qu.: 10860   1st Qu.: 0.8149  
+ Median :14414   Median : 33120   Median : 2.2216  
+ Mean   :15654   Mean   : 35387   Mean   : 2.7176  
+ 3rd Qu.:20714   3rd Qu.: 48266   3rd Qu.: 3.4567  
+ Max.   :71473   Max.   :165920   Max.   :14.8125  
+  uncomp.size        normal2        uncomp.speed    
+ Min.   :    32   Min.   :    32   Min.   :0.01507  
+ 1st Qu.: 10860   1st Qu.: 10860   1st Qu.:0.06390  
+ Median : 33120   Median : 33120   Median :0.13312  
+ Mean   : 35387   Mean   : 35387   Mean   :0.14893  
+ 3rd Qu.: 48266   3rd Qu.: 48266   3rd Qu.:0.18300  
+ Max.   :165920   Max.   :165920   Max.   :0.61670
 ~~~
 
 ~~~
