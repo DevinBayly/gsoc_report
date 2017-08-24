@@ -1,0 +1,11 @@
+%!TEX TS-program = xelatex
+\documentclass[12pt,twocolumn]{article}  
+% 
+
+$if(title)$
+\title{$title$}
+$endif$
+
+$if(title)$
+$title$
+$endif$

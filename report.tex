@@ -1,0 +1,449 @@
+%!TEX TS-program = xelatex
+\documentclass[12pt,twocolumn]{article}  
+
+% The declaration of the document class:
+
+% The second line here, i.e.
+% \documentclass[12pt]{scrartcl} 
+% is a standard LaTeX document class declaration: 
+% we say what kind of document we are making in curly brackets, 
+% and specify any options in square brackets.
+
+% (The previous line is a pseudo-comment, declaring that we will
+% use the special XeTeX machinery for its more extensive font list
+% and its use of unicode; 
+% in general, LaTeX 'comments' like this one
+%  begin with % and end with a linebreak.)
+
+% Note that there we have nothing in the nature of a template;
+% it's just a standard bit of LaTeX pandoc will copy unaltered into the 
+% LaTeX file it is writing.  But suppose you wrote something
+% more akin to the corresponding line in Pandoc's default 
+% latex.template file, say:
+
+% \documentclass{scrartcl}
+
+% then you would have invented a 'variable', fontsize, 
+% and could write things like 
+
+% `markdown2pdf my.txt --xetex --variable=fontsize:12pt -o my.pdf` or
+% `pandoc -r markdown -w html my.txt -s --xetex --variable=fontsize:24pt -o my.tex`. 
+
+% If we specified --variable-fontsize:12, then template substitution
+% would yield a LaTeX document beginning
+% \documentclass[12pt]{scrarcl}
+% which is just what we said anyway. 
+% But we could also specify a different fontsize.
+
+% I don't use this `--variable=....`functionality myself; 
+% I have a couple of basic templates I call with 
+% `--template=whatever.template` which I can also 
+% easily inspect to adjust things like font size as I please. 
+
+% While we are discussing the declaration of the document class...
+% here's an alternative command for two column landscape, 
+% not bad for some purposes. (If you strike the word 'landscape' 
+% you will have two narrow newspaperlike
+% columns; scientists like that, because irrationality must
+% show itself somewhere):
+%\documentclass[12pt,twocolumn,landscape]{scrartcl} 
+% Columns are too close together in LaTeX so we add this 
+% `columnsep` command:
+%\setlength{\columnsep}{.5in}
+
+
+% reasons I can't entirely remember; I'm not sure it's that great.
+% One reason is the unimportant one that, like many classes,
+% it allows very big fonts which are convenient for booklet printing 
+% in the idiotic American way by shrinking letterpaper pages.
+
+% the standard minimal LaTeX 'article' class declaration would be something like:
+
+% \documentclass[12pt]{article} 
+
+% or for big type:
+
+% \documentclass[24pt]{extarticle}
+
+% but these restrict you to old-fashioned LaTeX materials.
+% Note that Kieran Healy uses the swank 'Memoir' class, 
+% \documentclass[11pt,article,oneside]{memoir}
+% which might be worth a look. 
+
+% Enough about the document class.
+
+% -- We are in swanky unicode, XeTeX land, and must now import these packages:
+\usepackage{fontspec,xltxtra,xunicode}
+% fontspec means we can specify pretty much any font.
+% Because we are using XeTeX material,
+% this template needs to be called with the `--xetex` flag. 
+
+
+% Symbols: 
+% Pandoc imports the extensive `amsmath` collection of symbols 
+% for typesetting ordinary math.  
+\usepackage{amsmath}
+% if you use exotic symbols you need to import specific packages, eg. for
+% electrical engineering diagrams, musical notation, exotic currency symbols,
+% the unspeakable rites of freemasonry etc.
+
+
+% `babel`: 
+% The `babel` package, among other things, lets you determine what 
+% language you are using in a given stretch of text, so that typesetting 
+% will go well. Here we specify that mostly, we are speaking English:
+\usepackage[english]{babel}
+
+
+% Margins, etc:
+% the `geometry` package makes for convenient adjusting of margins, which is what
+% you asked about.  Of course it can do much more, even make coffee for you:
+\usepackage{geometry}
+\geometry{verbose,letterpaper,tmargin=3cm,bmargin=3cm,lmargin=3cm,rmargin=3cm}
+% so if you just keep a copy of this template in the directory you are working in, you
+% can adjust the margins by going into this file and messing with the margins.
+% the syntax is very unforgiving, but permits 3cm and 2.5in and some other things.
+
+
+% Font:
+% Here I set my main font, which is an Apple Corporation Exclusive, golly. 
+
+% \setmainfont{Hoefler Text}
+% \setromanfont[Mapping=tex-text,Contextuals={NoWordInitial,NoWordFinal,NoLineInitial,NoLineFinal},Ligatures={NoCommon}]{Hoefler Text}
+
+% Hoefler Text is okay, but note the long discussion of 'contextuals' which is necessary to cools off 
+% some of its show-offy properties. (You can make your essay look like the 
+% Declaration of Independence by specifying e.g. Ligatures={Rare} )
+% If you have a copy you might try it; as it is
+% I will comment it out and supply something more certain to be around:
+
+%\setmainfont{Times Roman}
+
+% Properly one should specify a sanserif font and a monospace font
+% see e.g. the example of Kieran Healy:
+% \setromanfont[Mapping=tex-text,Numbers=OldStyle]{Minion Pro} 
+% \setsansfont[Mapping=tex-text]{Minion Pro} 
+% \setmonofont[Mapping=tex-text,Scale=0.8]{Pragmata}
+
+% But I hate sanserif fonts, and anyway there are defaults.
+
+
+
+% Heading styles:
+
+
+
+% I'm puzzled why I have this foonote speciality, 
+% I wonder if it's part of my problem I've been having, but wont look
+% into it now. 
+\usepackage[flushmargin]{footmisc} 
+% \usepackage[hang,flushmargin]{footmisc}
+
+
+% So much for my personal template.
+
+
+% Everything that follows is copied from the pandoc default template:
+% I will interpolate a few comments, the comments that are in 
+% the default template will be marked % -- 
+
+% Paragraph format:
+% Pandoc prefers unindented paragraphs in the European style:
+\setlength{\parindent}{0pt}
+%  ... with paragraph breaks marked by a slight lengthening of 
+% the space between paragraphs:
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+
+% Page format:
+\pagestyle{plain}  
+% The default `plain` pagestyle just numbers the pages,
+% whereas  
+% \pagestyle{empty} 
+% would give you no numbering.
+% After one-million man-years of macro-composition, 
+% there are also fancy pagestyles with much wilder options 
+% for headers and footers, of course.
+
+% Footnotes
+% if you have code in your footnotes, the million macro march 
+% kind of bumps into itself.
+% Pandoc, having just rendered your text into LaTeX, 
+% knows whether the 'variable' `verbatim-in-note` is True, and 
+% If it is, it asks for a  LaTeX package that solves the dilemma:
+
+% Lists formatting: 
+% note sure what 'fancy enums' are; something to do with lists, 
+% as the further comment suggests: 
+
+
+% Table formatting: 
+% What if you make a table? -- Pandoc knows, of course, and 
+% then declares that its  variable `table` is True and 
+% imports a table package suitable to its pleasantly simple tables. 
+% Needless to say infinitely   complicated tables are possible in 
+% LaTeX with suitable packages. We are spared the temptation:
+
+
+
+% Subscripts:
+% Pandoc remembers whether you used subscripts, assigning True to 
+% its `subscript` variable 
+% It then needs to adopt a default with an incantation like this:
+
+
+% Web-style links:
+
+% markdown inclines us to use links, since our texts can be made into html. 
+% Why not have clickable blue links even in 
+% learned, scientific, religious, juridical, poetical and other suchlike texts? 
+% Never mind that they have been proven to destroy the nervous system!
+
+% First, what about the fact that links like http://example.com are 
+% technically code and thus must not be broken across lines? 
+% [breaklinks=true] to the rescue!
+
+% Nowadays LaTeX can handle all of this with another half million macros:
+
+\usepackage[breaklinks=true]{hyperref}
+\hypersetup{colorlinks,%
+citecolor=blue,%
+filecolor=blue,%
+linkcolor=blue,%
+urlcolor=blue}
+
+
+
+% Images. 
+% In ye olde LaTeX one could only import a limited range of image
+% types, e.g. the forgotten .eps files.  Or else one simply drew the image with suitable
+% commands and drawing packages.  Today we want to import .jpg files we make with 
+% our smart phones or whatever:
+
+
+
+
+% Section numbering.  
+% Here again is a variable you can specify on the commandline
+% `markdown2pdf my.txt --number-sections --xetex --template=/wherever/this/is -o my.pdf`
+\setcounter{secnumdepth}{0}
+
+% Footnotes: 
+% Wait, didn't we already discuss the crisis of code in footnotes?  
+% Evidently the order of unfolding of macros required that
+% we import a package to deal with them earlier
+% and issue a command it defines now. (Or maybe that's not the reason;
+% very often the order does matter as the insane system of macro expansion
+% must take place by stages.)
+
+% Other stuff you specify on the command line:
+% You can include stuff for the header from a file specified on the command line;
+% I've never done this, but that stuff will go here:
+
+% Title, authors, date.
+% If you specified title authors and date at the start of 
+% your pandoc-markdown file, pandoc knows the 'values' of the
+% variables: title authors date and fills them in.
+
+\title{something}
+\author{Devin Bayly}
+
+% At last: 
+% The document itself!:
+
+% After filling in all these blanks above, or erasing them 
+% where they are not needed, Pandoc has finished writing the 
+% famous LaTeX *preamble* for your document.
+% Now comes the all-important command \begin{document}
+% which as you can see, will be paired with an \end{document} at the end.
+% Pandoc knows whether you have a title, and has already
+% specified what it is; if so, it demands that the title be rendered.  
+% Pandoc knows whether you want a table of contents, you
+% specify this on the command line.
+% Then, after fiddling with alignments, there comes the real
+% business: pandoc slaps its rendering of your text in the place of
+% the variable `body`
+% It then concludes the document it has been writing. 
+
+\begin{document}
+
+
+
+
+
+\subsection{Abstract}\label{abstract}
+
+State of the art computational tools are in especially high demand in
+the field of Neuroscience. However, bottleneck exists in terms of how
+much data can be transferred between hard disk and memory for
+computation. As research increasingly relies on processing huge volumes
+of data, this issue demands attention. One strategy which addresses this
+is memory compression of data in memory (DRAM). Algorithms that are
+effective do a good job of decompressing exactly as much of the data as
+are needed for the calculations, so that they still minimize the memory
+footprint of the program without significant speed drops.
+
+This project exists to address this general bottleneck in the context of
+the Neuromapp program created by members of the Blue Brain Project team.
+The project was is split into research and implementation of in-memory
+compression along the lines of compression library selection, interface
+algorithm development, and block data structure design. The resulting
+compression mini-app is intended to relieve this bottleneck, and provide
+accelerated calculation capacity for the suite of associated mini-apps
+that come with Neuromapp. It appears that the current implementation
+doesn't resolve the problem, but could present benefits under other
+performance metrics than runtime and bandwith which were considered
+here. (??)
+
+\subsection{Introduction}\label{introduction}
+
+The compression library is nothing without a data object to apply it to,
+so let us briefly consider the block container. This data structure is
+Timothee Ewart's brain child, and i'll attempt to do just to the
+implementations description. At its core the block is a representation
+of a contiguous piece of memory. By adopting a convention that a unique
+block address can be described by the row position multiplied by the
+column position, we can transform a large 1 dimensional array of memory
+into a 2 dimensional representation; In this way the block may be
+treated like a general matrix. Worth noting upfront is the decision to
+embrace a policy design for the block, and its essential components.
+This means that a block particulars -- compressor, allocator, or type --
+can be specified in the instantiation. There are two varieties of
+allocator: cstandard is for regular malloc and free memory allocation;
+align is for posix memory allocation. Zlib is our currently implemented
+compression policy, but others can be added using zlib policy as a
+template. The numeric value stored in the block may be any one of the
+c++ numeric types, and this is accomplished through standard templating
+terms. These items make up the foundational aspects of the block.
+
+With this understanding in place, its worth discussing the functional
+capabilities of the block. The block supports basic IO using the c++
+stream redirection operator \textless{}\textless{} for output via
+ostream types, and input \textgreater{}\textgreater{} operations in
+relation to ifstream types. Continuing with STL related capabilities,
+the block also has a nested random access iterator class which enables
+more straightforward access to other tools in the STL, such as sorting.
+The compression capabilities of the block allow for one shot full block
+compression/uncompression using the zlib library. It is possible to to
+interrogate the block for information relating to its size, or current
+compression state. This layer is essential for using the block in higher
+level programs like those discussed below.
+
+The block doesn't exist in a vacuum, therefore lets now discuss the
+various tools included in the compression mini-app that leverage the
+block. Following the established pattern, the compression mini-app
+features a command line program: \textbf{use code markdown} ./app
+compression --compression --file \{file\_arg\} --split --sort
+--benchmark --stream\_benchmark --kernel\_measure are all options. The
+--compression flag runs a standard single file routine on the --file
+\{file\_arg\} if provided. The --split routine may be added in to parse
+the double, or float numeric type into its binary representation sorted
+by category: sign, sign, \ldots{} ,exponent, exponent, \ldots{}
+,mantissa, mantissa \ldots{} . The --sort option orders all of the
+columns in the block based on the values specified in a particular row
+of the block. The --benchmark is the default, and follows through with a
+compression, split,and sort combo run on a default specified file. The
+--stream\_benchmark option initiates the block hybrid of the
+STREAM\_BENCHMARK bandwith measurement test designed by John McCalpin at
+University of Virginia. Last but not least, we have the
+--kernel\_measure option which compares compression and non-compression
+performance changes as a function of increasing levels of computational
+complexity. At this point we have done an upper level tour of all of the
+functionality --both old and new-- that comes with the block, and the
+compression mini-app.
+
+\subsection{techniques}\label{techniques}
+
+This project has been a massive, and I mean massive learning experience.
+Tim joked with me once before the submission of proposals that ``most
+self labeling proficient programmers are only fooling themselves.''
+Where I'm concerned, I would have to agree. This project has exposed me
+to whole new programming paradigms, and lower and higher level
+computational tasks than I had ever tangled with before. It makes sense
+to briefly visit these items in some detail before looking at the
+results they yielded.
+
+In the life cycle of an implementation we must start with the build
+script, CMake, which was a completely unfamiliar tool for me. Currently
+the build is setup to disable the compression app by default because the
+Blue Queen (??) will likely experience problems with it. When enabled,
+Cmake for the compression mini-app can create a subdirectory in the
+\$\{Binary Root\} (out of source build directory root) named
+neuromapp/compression/\emph{. This file contains the compiled binaries
+necessary for running the compression mini-app, and sourcing input files
+from the neuromapp/test/block\_data/} path.
+
+Many of the methods used to create these binaries were also unfamiliar.
+Tim introduced me to policy design, and although it isn't second nature
+for me to think in those terms, I can appreciate the code-reuse options
+it presents. Now we have a framework for adding in additional
+compression libraries in the future which will be discussed later on. In
+implementing the splitting tool I had the chance to practice trait
+classing. Here we needed to express two varieties of union conversion
+structs: the uint32 variety corresponding to float type decimal
+conversion; and the alternative uint64 variety for teh double type
+decimal conversion. This is a natural example of where we benefit from
+defining a struct that at compile time has information relating to the
+constants, and types needed for the program. Before this project I was
+also unaware that you could convert decimals into binary number pieces
+for the sign, exponent, and mantissa. As discussed later, this was an
+important tool to design.
+
+Time is often our enemy, but it was crucial to have it working for us in
+this project. I designed a timer tool that is part of the compression
+mini-app that is very useful for profiling small chunks of code. I was
+unfamiliar with the chrono library for c++, but now I understand how to
+calculate ranges, and output results with meaningful units.
+
+The areas which made extensive use of the timer tool were the
+compression, kernel measure, and stream benchmark (WTW) routines. The
+zlib library is a classic piece of programming, and like an ancient
+sacred text, its documentation is dense. I only went so deep as to pick
+out the utility functions ``compress/uncompress'' \textbf{code} which
+are one-shot meaning they compress, and uncompress entirely. The stream
+benchmark is similar to the compression in that it deals with operations
+on a relatively low level. In the stream benchmark bandwith is composed
+of four canonical computations involving numeric containers (labeled
+A,B,C): the copy just asigns the contents of A to B; scale asigns scalar
+multiples of each element in A to B; add sums A and B elementwise and
+assigns to C; the triad assigns to C the elementwise sum of A and B
+multiplied by a scalar. The block hybrid uses A,B,C vectors containing
+640 blocks of 8000 bytes each to bring the actual transfer sizes to
+reasonable levels. In each of the computations described above we loop
+over all of the vector positions using the timer to calculate run times
+for the whole set. Each calculation is performed on blocks that involve
+the compression routine, and those that don't for comparison. I'm glad
+to have had a chance to learn about the STREAM BENCHMARK (McCalpins
+version) because it appears to be a useful starting metric of system
+performance. The kernel measure is another example of comparing
+performance on calculations that involve between the compression
+routines and those that do not. Here three complexity levels are used
+for comparison: first level is a simple addition of ints, meant to be
+the least complex computation which is still a computation; the second
+level is meant to resemble the calculation that is performed in updating
+synapses PSP's using the Tsodyks-Markram model treating the blocks data
+as parameters for the main formulae; the third level is a Euler method
+for solving a differential equation where the equation has been
+specified as \textbf{latex} y\^{}2 + 30*t arbitrarily. We use a vector
+of size 100 (??) containing file content based blocks, and report the
+times for each level, and compression/no-compression routine variety per
+block. This program (WTW) gave me experience writing functors with the
+added twist of passing them as arguments to ensure execution at the
+right functional level in the program.
+
+In this project I also came face to face with the creature known as
+BOOST, and that has its own ineffable consequences. The program\_options
+tool is used to great avail in the main function of our compression
+mini-app. It allows us to provide program help options, and parse the
+arguments provided by the user in a reasonable way. There's still plenty
+about the program\_options package that I can't fully comprehend, but
+its usefulness is not lost on me. BOOST also came in handy in our unit
+testing. We initially started testing to demonstrate that none of the
+values in the block are modified permanently as a result of the
+compression/uncompression routines. We also applied it to ensure that
+the process of reading into a file created the same block
+representations as if we had hand crafted the block, or string version
+output.
+
+{]}
+
+\end{document}
