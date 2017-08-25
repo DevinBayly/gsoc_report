@@ -90,6 +90,8 @@ Running each test input file through the different preprocessing methods before 
 
 ![Splitting Preprocess Results on Compression](./better_all_comp.png)
 
+![Comparison of Split vs Oneshot Compressed sizes](./oneshotvssplit.png)
+
 ## Discussion 
 
 It is worth mentioning at the start that what has been presented are experimental results. For instance, the splitting pre-process apparently has very little effect on the compression factor, and this only came to light in the process of forming this report. The experimental nature of this project also means we haven't had time to quantify what the actual memory savings are when additional steps for compression are included. It will be worth leveraging the `valgrind massif` tool in the future to determine what the runtime memory allocations look like.
